@@ -7,6 +7,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
+#include <stdint.h>
 
 typedef uint16_t header_t;
 
@@ -27,7 +28,7 @@ typedef struct Command {
 header_t* next_block(header_t* header);
 int read_command(struct Command* container);
 void allocate_block(char*heap, char** input);
-void create_block(char* target, size_t size, bool allocated);
+void create_block(header_t* target, size_t size, bool allocated);
 void free_block(char*heap, char** input);
 void free_command(struct Command* target);
 void heap_alloc();
@@ -47,7 +48,7 @@ https://eee.uci.edu/16s/36680/labs/lab3_malloc.pdf
 */
 void heap_alloc() {
   int block_count = 0;
-  char *heap = malloc (400)
+  char *heap = malloc (400);
   struct Command input; // Input read in from the command line.
   create_block((header_t*)heap, 400, false);
   // Run the heap_alloc's loop.
