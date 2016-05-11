@@ -154,15 +154,7 @@ int read_command(struct Command* container) {
       i++;
     }
   }
-  // The exec functions require the argument array to be null-terminated.
-  strings[strings_len] = NULL;
-  // Determine if the command should be processed in the background.
-  if(strcmp(strings[strings_len - 1], "&") == 0) {
-    container->background = true;
-    strings[strings_len - 1] = NULL;
-  } else {
-    container->background = false;
-  }
+
   // Store the data in "container"
   container->_line_alloc = line;
   container->_strings_alloc = strings;
@@ -194,7 +186,6 @@ void free_command(struct Command* target) {
   target->array = NULL;
   target->len = 0;
   target->program = NULL;
-  target->background = false;
 }
 
 /*** function allocate_block ***
@@ -206,7 +197,7 @@ Input:
   input[1] : Number of bytes to be allocated
 Returns: void
 */
-void allocate_block(Heap heap, char** input) {
+void allocate_block(char*heap, char** input) {
   // TODO
 }
 
@@ -219,7 +210,7 @@ Input:
   input[1] : The number of the block which will be deallocated.
 Returns: void
 */
-void free_block(Heap heap, char** input) {
+void free_block(char*heap, char** input) {
   // TODO
 }
 
@@ -231,7 +222,7 @@ Input:
   input[0] : The name of this program
 Returns: void
 */
-void print_blocklist(Heap heap, char** input) {
+void print_blocklist(char*heap, char** input) {
   // TODO
 }
 
@@ -246,7 +237,7 @@ Input:
   input[3] : The number of characters written
 Returns: void
 */
-void write_block(Heap heap, char** input) {
+void write_block(char*heap, char** input) {
   // TODO
 }
 
@@ -260,6 +251,6 @@ Input:
   input[2] : Number of bytes (chars) to print
 Returns: void
 */
-void print_heap(Heap heap, char** input) {
+void print_heap(char*heap, char** input) {
   // TODO
 }
