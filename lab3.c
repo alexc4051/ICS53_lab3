@@ -8,6 +8,8 @@
 #include <stdlib.h>
 #include <string.h>
 
+typedef uint16_t header_t;
+
 /*** struct Command ***
 This structure stores a single line read in from getline() formatted as a
 two-dimensional array of strings stored in Command.array.
@@ -16,19 +18,22 @@ typedef struct Command {
   char* program; // command, also array[0].
   char** array; // A array of strings which represent the given command.
   unsigned int len; // The number of strings in this.array.
- 
+
   void* _line_alloc; // The address of the allocated line.
   void* _strings_alloc; // The address of the array of strings.
 } Command;
 
 // Prototypes
+header_t* next_block(header_t* header);
 int read_command(struct Command* container);
 void allocate_block(char*heap, char** input);
+void create_block(char* target, size_t size, bool allocated);
 void free_block(char*heap, char** input);
 void free_command(struct Command* target);
 void heap_alloc();
 void print_blocklist(char*heap, char** input);
 void print_heap(char*heap, char** input);
+void read_block(header_t* header, size_t* size, bool* allocated);
 void write_block(char*heap, char** input);
 
 int main() {
@@ -41,10 +46,10 @@ Run the memory allocation as outlined in lab 3:
 https://eee.uci.edu/16s/36680/labs/lab3_malloc.pdf
 */
 void heap_alloc() {
-  int block_count = 0; 
+  int block_count = 0;
   char *heap = malloc (400)
   struct Command input; // Input read in from the command line.
-  
+  create_block((header_t*)heap, 400, false);
   // Run the heap_alloc's loop.
  while(1) {
     // Read in input from the console and run the command.
@@ -84,10 +89,9 @@ void heap_alloc() {
     free_command(&input);
   }
   // Deallocate the heap.
-  // TODO
   free(heap);
 }
-	
+
 /*** function read_command ***
 Read in a line from stdin and build a Command structure based off of the
 information read in. The function getline() will be used to read in data.
@@ -253,4 +257,58 @@ Returns: void
 */
 void print_heap(char*heap, char** input) {
   // TODO
+}
+
+/*** function next_block ***
+Read a given header and jump to the next value in the heap.
+Input:
+# header_t* header : A pointer to the initial header.
+Return:
+# Success : A pointer to the next header
+# Failure : NULL
+*/
+header_t* next_block(header_t* header) {
+  int size; // The size of the provided header.
+
+  if(!header) {
+    fprintf(stderr, "Null header passed into next_block\n");
+    return NULL;
+  }
+
+  // Read in the size of the header.
+  // Note: 0x8000 == 1000 0000 0000 0000 in binary, so this line will get rid
+  // of the most significant bit (that stores the allocated bit).
+  size = *header & ~0x8000;
+
+  // TODO - Verify that the next header is within the bounds of the heap
+  // Should we make a "end" block? Maybe store a pointer to the last character
+  // in the heap?
+
+  // Return a pointer to the next header.
+  return (header_t*)(((char*) header) + size);
+}
+
+/*** function read_block ***
+Read data from a header.
+Input:
+# header_t* header : A pointer to the target header.
+# size_t* size : The size read in from "header"
+# bool* allocated : A boolean indicating whether or not the block is allocated.
+Return: void
+*/
+void read_block(header_t* header, size_t* size, bool* allocated) {
+  *size = *header & ~0x8000; // Read in the size of the header.
+  *allocated = *header & 0x8000 ? true : false; // Check the allocated bit
+}
+
+/*** function create_block ***
+Read data from a header.
+Input:
+# header_t* header : A pointer to the target header.
+# size_t* size : The size read in from "header"
+# bool* allocated : A boolean indicating whether or not the block is allocated.
+Return: void
+*/
+void create_block(header_t* header, size_t size, bool allocated) {
+  *header = allocated == true ? size | 0x8000 : size;
 }
