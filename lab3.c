@@ -23,13 +23,13 @@ typedef struct Command {
 
 // Prototypes
 int read_command(struct Command* container);
-void allocate_block(char*HEAP, char** input);
-void free_block(char*HEAP, char** input);
+void allocate_block(char*heap, char** input);
+void free_block(char*heap, char** input);
 void free_command(struct Command* target);
 void heap_alloc();
-void print_blocklist(char*HEAP, char** input);
-void print_heap(char*HEAP, char** input);
-void write_block(char*HEAP, char** input);
+void print_blocklist(char*heap, char** input);
+void print_heap(char*heap, char** input);
+void write_block(char*heap, char** input);
 
 int main() {
   heap_alloc();
