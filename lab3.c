@@ -49,6 +49,8 @@ https://eee.uci.edu/16s/36680/labs/lab3_malloc.pdf
 void heap_alloc() {
   char *heap = malloc (400);
   struct Command input; // Input read in from the command line.
+  // Set all values in the heap to zero
+  memset(heap, '\0', 400);
   // Run the heap_alloc's loop.
   while(1) {
     // Read in input from the console and run the command.
@@ -109,6 +111,12 @@ int read_command(struct Command* container) {
   size_t i = 0; // Index
   size_t len = 0; // The length of "line"
   size_t strings_len = 0; // The starting size of "strings"
+  // Initialize "container"
+  container->_line_alloc = NULL;
+  container->_strings_alloc = NULL;
+  container->array = NULL;
+  container->len = 0;
+  container->program = NULL;
   // Read in line from stdin (getline() will allocate space.)
   printf("> ");
   if(getline(&line, &len, stdin) < 0) {
@@ -181,8 +189,8 @@ void free_command(struct Command* target) {
     return;
   }
 
-  free(target->_line_alloc);
-  free(target->_strings_alloc);
+  if(target->_line_alloc) free(target->_line_alloc);
+  if(target->_strings_alloc) free(target->_strings_alloc);
 
   target->_line_alloc = NULL;
   target->_strings_alloc = NULL;
