@@ -209,7 +209,6 @@ Input:
 Returns: void
 */
 void allocate_block(char*heap, char** input) {
-<<<<<<< HEAD
 	size_t allocationSize = atoi(input[1]);
 	size_t size;
 	bool allocated;
@@ -230,24 +229,6 @@ void allocate_block(char*heap, char** input) {
 	}
 	create_block((header_t*)point, allocationSize, true);
 	printf("%d\n", number_given);
-=======
-  size_t allocationSize = atoi(input[1]);
-	size_t size;
-	bool allocated;
-	header_t header = *heap;
-	read_block(&header, &size, &allocated);
-  if(allocationSize <= 0) {
-    puts("Invalid allocation size.");
-    return;
-  }
-	while (!allocated){
-		// header = (header_t*)(((char*) header) + size);
-    header = *next_block(&header);
-		if (!header) break;
-		read_block(&header, &size, &allocated);
-	}
-	create_block(&header, allocationSize, false);
->>>>>>> f1906cc757ca155646651ba51f6058aefd222689
 }
 
 /*** function free_block ***
@@ -260,7 +241,6 @@ Input:
 Returns: void
 */
 void free_block(char*heap, char** input) {
-<<<<<<< HEAD
 	int blockDelete = atoi(input[1]);
 	int blockNumber = 0;
 	size_t size;
@@ -268,28 +248,13 @@ void free_block(char*heap, char** input) {
 	char *point = heap;
 	header_t header = *point;
   if(blockDelete <= 0) {
-=======
-  int blockNumber = atoi(input[1]);
-	int count = 0;
-	size_t size;
-	bool allocated;
-	header_t header = *heap;
-  if(blockNumber <= 0) {
->>>>>>> f1906cc757ca155646651ba51f6058aefd222689
     puts("Invalid block number.");
     return;
   }
 	read_block(&header, &size, &allocated);
-<<<<<<< HEAD
 	while(blockNumber != blockDelete){
 	  point = (char*) next_block((header_t*) point);
 	  if (!header) {printf("MEMORY CORRUPTED"); exit(0);}
-=======
-	for (;count < blockNumber; count++){
-	  if (!header) {printf("MEMORY CORRUPTED"); exit(0);}
-	  // header = (header_t*)(((char*) header) + size);
-    header = *next_block(&header);
->>>>>>> f1906cc757ca155646651ba51f6058aefd222689
 	  read_block(&header, &size, &allocated);
   }
   create_block((header_t*)point, size, false);
