@@ -47,12 +47,10 @@ Run the memory allocation as outlined in lab 3:
 https://eee.uci.edu/16s/36680/labs/lab3_malloc.pdf
 */
 void heap_alloc() {
-  int block_count = 0;
   char *heap = malloc (400);
   struct Command input; // Input read in from the command line.
-  create_block((header_t*)heap, 400, false);
   // Run the heap_alloc's loop.
- while(1) {
+  while(1) {
     // Read in input from the console and run the command.
     if(read_command(&input) > 0) {
       // Quit condition.
@@ -203,16 +201,22 @@ Input:
 Returns: void
 */
 void allocate_block(char*heap, char** input) {
+  size_t allocationSize = atoi(input[1]);
 	size_t size;
 	bool allocated;
-	header_t header = heap;
+	header_t header = *heap;
 	read_block(&header, &size, &allocated);
+  if(allocationSize <= 0) {
+    puts("Invalid allocation size.");
+    return;
+  }
 	while (!allocated){
-		header = (header_t*)(((char*) header) + size);
+		// header = (header_t*)(((char*) header) + size);
+    header = *next_block(&header);
 		if (!header) break;
-		read_block(&header, &size, &allocated);	
+		read_block(&header, &size, &allocated);
 	}
-	create_block(&header, input[1], false);
+	create_block(&header, allocationSize, false);
 }
 
 /*** function free_block ***
@@ -225,15 +229,21 @@ Input:
 Returns: void
 */
 void free_block(char*heap, char** input) {
+  int blockNumber = atoi(input[1]);
 	int count = 0;
 	size_t size;
 	bool allocated;
-	header_t header = heap;
-	read_block(&header, &size, &allocated);  
-	for (;count < input[1]; count++){
+	header_t header = *heap;
+  if(blockNumber <= 0) {
+    puts("Invalid block number.");
+    return;
+  }
+	read_block(&header, &size, &allocated);
+	for (;count < blockNumber; count++){
 	  if (!header) {printf("MEMORY CORRUPTED"); exit(0);}
-	  header = (header_t*)(((char*) header) + size);
-	  read_block(&header, &size, &allocated);	
+	  // header = (header_t*)(((char*) header) + size);
+    header = *next_block(&header);
+	  read_block(&header, &size, &allocated);
   }
   //TO DO: SET HEADER TO FALSE
 }
@@ -247,7 +257,23 @@ Input:
 Returns: void
 */
 void print_blocklist(char*heap, char** input) {
-  // TODO
+  size_t size; // The size of a single block.
+  bool allocated; // The allocation status of a single block.
+  char* start; // The starting address of a single block.
+  char* end; // The ending address of a single block
+  start = heap;
+  printf("Size\tAllocated\tStart\tEnd\t\n");
+  // Loop through the blocks
+  while(*((header_t*) start) != 0) {
+    // Read in the target block.
+    read_block((header_t*) start, &size, &allocated);
+    // Point to it's end.
+    end = start + size - 1;
+    // Print it's information to stdout.
+    printf("%ld\t%s\t%p\t%p\n", size, allocated == true ? "yes" : "no", start, end);
+    // Advance to the next block.
+    start = (char*) next_block((header_t*) start);
+  }
 }
 
 /*** function write_block ***
@@ -299,10 +325,6 @@ header_t* next_block(header_t* header) {
   // Note: 0x8000 == 1000 0000 0000 0000 in binary, so this line will get rid
   // of the most significant bit (that stores the allocated bit).
   size = *header & ~0x8000;
-
-  // TODO - Verify that the next header is within the bounds of the heap
-  // Should we make a "end" block? Maybe store a pointer to the last character
-  // in the heap?
 
   // Return a pointer to the next header.
   return (header_t*)(((char*) header) + size);
