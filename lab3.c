@@ -212,7 +212,7 @@ void allocate_block(char*heap, char** input) {
 		if (!header) break;
 		read_block(&header, &size, &allocated);	
 	}
-	create_block(&header, input[1], true);
+	create_block(&header, input[1], false);
 }
 
 /*** function free_block ***
@@ -225,7 +225,17 @@ Input:
 Returns: void
 */
 void free_block(char*heap, char** input) {
-  // TODO
+	int count = 0;
+	size_t size;
+	bool allocated;
+	header_t header = heap;
+	read_block(&header, &size, &allocated);  
+	for (;count < input[1]; count++){
+	  if (!header) {printf("MEMORY CORRUPTED"); exit(0);}
+	  header = (header_t*)(((char*) header) + size);
+	  read_block(&header, &size, &allocated);	
+  }
+  //TO DO: SET HEADER TO FALSE
 }
 
 /*** function print_blocklist ***
