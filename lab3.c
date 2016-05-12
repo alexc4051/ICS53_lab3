@@ -26,6 +26,7 @@ typedef struct Command {
 
 // Prototypes
 header_t* next_block(header_t* header);
+int block_count = 0;
 int read_command(struct Command* container);
 void allocate_block(char*heap, char** input);
 void create_block(header_t* header, size_t size, bool allocated);
@@ -228,6 +229,7 @@ void allocate_block(char*heap, char** input) {
 		
 	}
 	create_block((header_t*)point, allocationSize, true);
+	number_given = ++block_count;
 	printf("%d\n", number_given);
 }
 
