@@ -35,7 +35,7 @@ void free_command(struct Command* target);
 void heap_alloc();
 void print_blocklist(char*heap, char** input);
 void print_heap(char*heap, char** input);
-void read_block(header_t* header, size_t* size, bool* allocated);
+void read_block(header_t* header, size_t* size, bool* allocated, size_t* blockID);
 void write_block(char*heap, char** input);
 
 int main() {
@@ -212,25 +212,34 @@ Returns: void
 void allocate_block(char*heap, char** input) {
 	size_t allocationSize = atoi(input[1]);
 	size_t size;
-	bool allocated;
+	bool allocated = false;
 	char *point = heap;
 	header_t header = *point;
 	int number_given = 0;
+	size_t blockID;
 	if(allocationSize <= 0) {
 		puts("Invalid allocation size.");
 		return;
 	}
-	while (header){
+	read_block((header_t*) point, &size, &allocated, &blockID);
+	while (header && allocated == true){
 		// header = (header_t*)(((char*) header) + size);
-		read_block((header_t*) point, &size, &allocated);
-		
 		point = (char*) next_block((header_t*) point);
 		header = *point;
-		
+		read_block((header_t*) point, &size, &allocated, &blockID);
 	}
-	create_block((header_t*)point, allocationSize, true);
-	number_given = ++block_count;
-	printf("%d\n", number_given);
+	if(!header){
+		printf("First\n");
+		create_block((header_t*)point, allocationSize, true);
+		printf("%d\n", ++block_count);
+	}
+	else if(header && allocated == false){
+		printf("Second\n");
+		create_block((header_t*)point, allocationSize, true);
+		point = point + allocationSize;
+		create_block((header_t*)point, size - allocationSize-1, false);
+		printf("%d\n", ++block_count);
+	}
 }
 
 /*** function free_block ***
@@ -244,7 +253,7 @@ Returns: void
 */
 void free_block(char*heap, char** input) {
 	int blockDelete = atoi(input[1]);
-	int blockNumber = 0;
+	int blockID;
 	size_t size;
 	bool allocated;
 	char *point = heap;
@@ -253,13 +262,14 @@ void free_block(char*heap, char** input) {
     puts("Invalid block number.");
     return;
   }
-	read_block(&header, &size, &allocated);
-	while(blockNumber != blockDelete){
+	read_block(&header, &size, &allocated, &blockID);
+	while(blockID != blockDelete){
 	  point = (char*) next_block((header_t*) point);
-	  if (!header) {printf("MEMORY CORRUPTED"); exit(0);}
-	  read_block(&header, &size, &allocated);
+	  if (!header) {puts("Invalid block number."); return;}
+	  read_block(&header, &size, &allocated, &blockID);
   }
-  create_block((header_t*)point, size, false);
+	
+	if (blockID == blockDelete) create_block((header_t*)point, size, false);
 }
 
 /*** function print_blocklist ***
@@ -272,6 +282,7 @@ Returns: void
 */
 void print_blocklist(char*heap, char** input) {
   size_t size; // The size of a single block.
+  size_t blockID;
   bool allocated; // The allocation status of a single block.
   char* start; // The starting address of a single block.
   char* end; // The ending address of a single block
@@ -280,11 +291,11 @@ void print_blocklist(char*heap, char** input) {
   // Loop through the blocks
   while(*((header_t*) start) != 0) {
     // Read in the target block.
-    read_block((header_t*) start, &size, &allocated);
+    read_block((header_t*) start, &size, &allocated, &blockID);
     // Point to it's end.
     end = start + size - 1;
     // Print it's information to stdout.
-    printf("%ld\t%s\t%p\t%p\n", size, allocated == true ? "yes" : "no", start, end);
+    printf("%ld\t%s\t%p\t%p\t%ld\n", size, allocated == true ? "yes" : "no", start, end, blockID);
     // Advance to the next block.
     start = (char*) next_block((header_t*) start);
   }
@@ -352,9 +363,11 @@ Input:
 # bool* allocated : A boolean indicating whether or not the block is allocated.
 Return: void
 */
-void read_block(header_t* header, size_t* size, bool* allocated) {
-  *size = *header & ~0x8000; // Read in the size of the header.
+void read_block(header_t* header, size_t* size, bool* allocated, size_t* blockID) {
   *allocated = *header & 0x8000 ? true : false; // Check the allocated bit
+  *blockID = (size_t*)((*header & ~0x8000)/256 + 1);
+  printf("%d\n", *blockID);
+  *size = (size_t*)(*header & ~0x8000 - (*blockID)*256); // Read in the size of the header.
 }
 
 /*** function create_block ***
@@ -367,4 +380,7 @@ Return: void
 */
 void create_block(header_t* header, size_t size, bool allocated) {
   *header = allocated == true ? size | 0x8000 : size;
+  int i = 0;
+  for (;i<block_count;i++)
+	  *header += 256;
 }
