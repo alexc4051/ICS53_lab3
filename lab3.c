@@ -346,12 +346,6 @@ void write_block(char*heap, char** input) {
     }
   }
 
-  // Ensure we are not writting past the blocks limits.
-  if(size - 2 < charNum) {
-    printf("Target block is smaller than request number of chars,\n truncating request to %ld chars.\n", size - 2);
-    charNum = size - 2;
-  }
-
   for(i = 0; i < charNum; i++) {
     *((char*) point + i + 2) = character;
   }
