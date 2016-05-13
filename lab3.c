@@ -230,8 +230,8 @@ void allocate_block(char*heap, char** input) {
 	}
 	if(!header){
 		printf("First\n");
-		create_block((header_t*)point, allocationSize, true);
 		printf("%d\n", ++block_count);
+		create_block((header_t*)point, allocationSize, true);
 	}
 	else if(header && allocated == false){
 		printf("Second\n");
@@ -366,7 +366,7 @@ Return: void
 */
 void read_block(header_t* header, size_t* size, bool* allocated, size_t* blockID) {
   *allocated = *header & 0x8000 ? true : false; // Check the allocated bit
-  *blockID = (size_t*)((*header & ~0x8000)/256 + 1);
+  *blockID = (size_t*)((*header & ~0x8000)/256);
   *size = (size_t*)(*header & ~0x8000 - (*blockID)*256); // Read in the size of the header.
 }
 
