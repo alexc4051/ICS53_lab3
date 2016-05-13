@@ -357,7 +357,7 @@ void write_block(char*heap, char** input) {
   // Find the target block
   while(1) {
     read_block(point, &size, &allocated, &blockID);
-    if(blockID != targetBlock) {
+    if(blockID == targetBlock) {
       break;
     } else if(blockID == 0) {
       puts("Unable to find target block");
@@ -366,11 +366,13 @@ void write_block(char*heap, char** input) {
       point = next_block(point);
     }
   }
-
+	printf("%d\n", blockID);
   if (!allocated){
-			puts("Invalid block number.");
-			return;
-		}
+		puts("Invalid block number. Block must be reallocated to use.");
+		return;
+	}
+  if (size-2 < charNum) printf("ERROR: YOU ARE NOW CORRUPTING THE HEAP!\n");
+  
   for(i = 0; i < charNum; i++) {
     *((char*) point + 2 + i) = character;
   }
@@ -404,7 +406,7 @@ void print_heap(char*heap, char** input) {
   // Find the target block
   while(1) {
     read_block(point, &size, &allocated, &blockID);
-    if(blockID != targetBlock) {
+    if(blockID == targetBlock) {
       break;
     } else if(blockID == 0) {
       puts("Unable to find target block");
@@ -414,10 +416,12 @@ void print_heap(char*heap, char** input) {
     }
   }
   if (!allocated){
-			puts("Invalid block number.");
-			return;
-		}
+		puts("Invalid block number.");
+		return;
+	}
 
+  if (size-2 < numBytes) printf("ERROR: Reading more than block size.\n");
+  
   for(i = 0; i < numBytes; i++) {
     printf("%c", *((char*) point + 2 + i));
   }
