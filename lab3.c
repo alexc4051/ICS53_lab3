@@ -229,16 +229,16 @@ void allocate_block(char*heap, char** input) {
 		read_block((header_t*) point, &size, &allocated, &blockID);
 	}
 	if(!header){
-		printf("First\n");
-		printf("%d\n", ++block_count);
+		++block_count;
 		create_block((header_t*)point, allocationSize, true);
 	}
 	else if(header && allocated == false){
 		printf("Second\n");
-		create_block((header_t*)point, allocationSize, true);
-		point = point + allocationSize;
-		create_block((header_t*)point, size - allocationSize-1, false);
 		printf("%d\n", ++block_count);
+		*point = allocationSize | 0x8000;
+		printf("%d\n", point);
+		point = point + allocationSize;
+		printf("%d\n", point);
 	}
 }
 
@@ -269,7 +269,10 @@ void free_block(char*heap, char** input) {
 	  read_block(&header, &size, &allocated, &blockID);
   }
 	
-	if (blockID == blockDelete) create_block((header_t*)point, size, false);
+	if (blockID == blockDelete){
+		*(header_t*)point = *(header_t*)point & ~0x8000;
+		
+	} 
 }
 
 /*** function print_blocklist ***
