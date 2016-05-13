@@ -314,7 +314,20 @@ Input:
 Returns: void
 */
 void write_block(char*heap, char** input) {
+  int blockWrite = atoi(input[1]); // Target block number
+  char character = input[2]; // The character which will be written
+  int charNum = atoi(input[3]); // The number of characters requested to be written
+  size_t size; // The allocated space
+  size_t blockID;
+  bool allocated; // Check block to make sure it is allocated to write to?
+  char *point = heap;
+  header_t header = *point;
   // TODO
+  //while ()
+  //{
+    //read_block((header_t*) point, &size, &allocated, &blockID);
+    //point = (char*) next_block((header_t*) point);
+  //}
 }
 
 /*** function print_heap ***
@@ -328,6 +341,13 @@ Input:
 Returns: void
 */
 void print_heap(char*heap, char** input) {
+  int blockRead = atoi(input[1]); // Target block number
+  int charNum = atoi(input[2]); // Number of bytes (chars) to print
+  size_t size;
+  size_t blockID;
+  bool allocated; // Check block to make sure it is allocated to write to?
+  char *point = heap;
+  header_t header = *point;
   // TODO
 }
 
