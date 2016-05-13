@@ -217,8 +217,8 @@ void allocate_block(char*heap, char** input) {
 	header_t header = *point;
 	int number_given = 0;
 	size_t blockID;
-	if(allocationSize <= 0) {
-		puts("Invalid allocation size.");
+	if(allocationSize <= 2) {
+		puts("Invalid allocation size. Header is 2 bytes. Minimum Allocation Size is 3 bytes");
 		return;
 	}
 	read_block((header_t*) point, &size, &allocated, &blockID);
@@ -228,11 +228,25 @@ void allocate_block(char*heap, char** input) {
 		header = *point;
 		read_block((header_t*) point, &size, &allocated, &blockID);
 	}
-	if(header && allocated == false){
-		++block_count;
+	++block_count;
+	printf("%d\n", block_count);
+	if (size == allocationSize){
+		*(header_t*)point = (allocationSize) | 0x8000 + block_count*512;
+	}
+	else if((size - allocationSize) > 2){
 		*(header_t*)point = (allocationSize) | 0x8000 + block_count*512;
 		point = point + allocationSize;
-		*(header_t*)point = size - allocationSize;
+		if (!*(header_t*)point){
+			*(header_t*)point = size - allocationSize;
+		}
+	}
+	else{
+		printf("Remaining blocks remaining will lead to fragmentation, block size increased to eliminate fragmentation.")
+		*(header_t*)point = (size) | 0x8000 + block_count*512;
+		point = point + size;
+		if (!*(header_t*)point){
+			*(header_t*)point = size;
+		}
 	}
 }
 
@@ -259,13 +273,12 @@ void free_block(char*heap, char** input) {
 	read_block((header_t*) point, &size, &allocated, &blockID);
 	while(blockID != blockDelete){
 	  point = (char*) next_block((header_t*) point);
-	  if (!(header_t*)point){
+	  if ((header_t*)point == 0){
 		  puts("Invalid block number.");
 		  return;
 	}
 	  read_block((header_t*) point, &size, &allocated, &blockID);
   }
-	//printf("%d\t%d\n", blockID,blockDelete);
 	if (blockID == blockDelete){
 		*(header_t*)point = *(header_t*)point & ~0x8000;
 		*(header_t*)point -= 512*blockID;
@@ -348,7 +361,7 @@ void write_block(char*heap, char** input) {
   }
 
   for(i = 0; i < charNum; i++) {
-    *((char*) point + i) = character;
+    *((char*) point + i + 2) = character;
   }
 
 }
@@ -389,7 +402,7 @@ void print_heap(char*heap, char** input) {
   }
 
   for(i = 0; i < numBytes; i++) {
-    printf("%c", *((char*) point + i));
+    printf("%c", *((char*) point + i + 2));
   }
   printf("\n");
 }
@@ -413,7 +426,7 @@ header_t* next_block(header_t* header) {
   // Read in the size of the header.
   // Note: 0x8000 == 1000 0000 0000 0000 in binary, so this line will get rid
   // of the most significant bit (that stores the allocated bit).
-  size = *header & 0x00FF;
+  size = ((*header & ~0x8000) - ((*header & ~0x8000)/512)*512);
 
   // Return a pointer to the next header.
   return (header_t*)(((char*) header) + size);
