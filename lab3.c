@@ -241,7 +241,7 @@ void allocate_block(char*heap, char** input) {
 		}
 	}
 	else{
-		printf("Remaining blocks remaining will lead to fragmentation, block size increased to eliminate fragmentation.")
+		printf("Remaining blocks remaining will lead to fragmentation, block size increased to eliminate fragmentation.\n");
 		*(header_t*)point = (size) | 0x8000 + block_count*512;
 		point = point + size;
 		if (!*(header_t*)point){
@@ -273,15 +273,18 @@ void free_block(char*heap, char** input) {
 	read_block((header_t*) point, &size, &allocated, &blockID);
 	while(blockID != blockDelete){
 	  point = (char*) next_block((header_t*) point);
-	  if ((header_t*)point == 0){
-		  puts("Invalid block number.");
-		  return;
-	}
 	  read_block((header_t*) point, &size, &allocated, &blockID);
+	  if (blockID == 0){
+			puts("Invalid block number.");
+			return;  
+	  }
   }
 	if (blockID == blockDelete){
+		if (!allocated){
+			puts("Invalid block number.");
+			return;
+		}
 		*(header_t*)point = *(header_t*)point & ~0x8000;
-		*(header_t*)point -= 512*blockID;
 	}
 }
 
@@ -352,7 +355,7 @@ void write_block(char*heap, char** input) {
   // Find the target block
   while(blockID != targetBlock) {
     read_block(point, &size, &allocated, &blockID);
-    if(*point == 0) {
+    if(blockID == 0) {
       puts("Unable to find target block");
       return;
     } else {
@@ -360,8 +363,12 @@ void write_block(char*heap, char** input) {
     }
   }
 
-  for(i = 0; i < charNum; i++) {
-    *((char*) point + i + 2) = character;
+  if (!allocated){
+			puts("Invalid block number.");
+			return;
+		}
+  for(i = 2; i < charNum; i++) {
+    *((char*) point +i) = character;
   }
 
 }
@@ -393,16 +400,20 @@ void print_heap(char*heap, char** input) {
   // Find the target block
   while(blockID != targetBlock) {
     read_block(point, &size, &allocated, &blockID);
-    if(*point == 0) {
+    if(blockID == 0) {
       puts("Unable to find target block");
       return;
     } else {
       point = next_block(point);
     }
   }
+  if (!allocated){
+			puts("Invalid block number.");
+			return;
+		}
 
-  for(i = 0; i < numBytes; i++) {
-    printf("%c", *((char*) point + i + 2));
+  for(i = 2; i < numBytes; i++) {
+    printf("%c", *((char*) point + i));
   }
   printf("\n");
 }
