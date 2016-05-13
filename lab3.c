@@ -291,7 +291,9 @@ void print_blocklist(char*heap, char** input) {
   char* start; // The starting address of a single block.
   char* end; // The ending address of a single block
   start = heap;
+
   printf("Size\tAllocated\tStart\tEnd\t\n");
+
   // Loop through the blocks
   while(*(header_t*)start) {
     // Read in the target block.
@@ -299,7 +301,7 @@ void print_blocklist(char*heap, char** input) {
     // Point to it's end.
     end = start + size - 1;
     // Print it's information to stdout.
-	//BlockID added to just check for and ease of use
+	  //BlockID added to just check for and ease of use
     printf("%ld\t%s\t%p\t%p\t%ld\n", size, allocated == true ? "yes" : "no", start, end, blockID);
     // Advance to the next block.
     start = (char*) next_block((header_t*) start);
@@ -318,20 +320,42 @@ Input:
 Returns: void
 */
 void write_block(char*heap, char** input) {
-  int blockWrite = atoi(input[1]); // Target block number
-  char character = input[2]; // The character which will be written
+  int targetBlock = atoi(input[1]); // Target block number
+  char character = input[2][0]; // The character which will be written
   int charNum = atoi(input[3]); // The number of characters requested to be written
   size_t size; // The allocated space
-  size_t blockID;
+  size_t blockID; // The block id of the examined block.
   bool allocated; // Check block to make sure it is allocated to write to?
-  char *point = heap;
-  header_t header = *point;
-  // TODO
-  //while ()
-  //{
-    //read_block((header_t*) point, &size, &allocated, &blockID);
-    //point = (char*) next_block((header_t*) point);
-  //}
+  header_t* point = (header_t*) heap; // The examined header.
+  int i; // Index
+
+  // Validate input
+  if(targetBlock <= 0 || charNum <= 0) {
+    puts("Invalid arguments.");
+    return;
+  }
+
+  // Find the target block
+  while(blockID != targetBlock) {
+    read_block(point, &size, &allocated, &blockID);
+    if(*point == 0) {
+      puts("Unable to find target block");
+      return;
+    } else {
+      point = next_block(point);
+    }
+  }
+
+  // Ensure we are not writting past the blocks limits.
+  if(size - 2 < charNum) {
+    printf("Target block is smaller than request number of chars,\n truncating request to %ld chars.\n", size - 2);
+    charNum = size - 2;
+  }
+
+  for(i = 0; i < charNum; i++) {
+    *((char*) point + i + 2) = character;
+  }
+
 }
 
 /*** function print_heap ***
@@ -345,14 +369,34 @@ Input:
 Returns: void
 */
 void print_heap(char*heap, char** input) {
-  int blockRead = atoi(input[1]); // Target block number
-  int charNum = atoi(input[2]); // Number of bytes (chars) to print
-  size_t size;
-  size_t blockID;
+  int targetBlock = atoi(input[1]); // The target block
+  int numBytes = atoi(input[2]); // The number of bytes to print
+  size_t size; // The allocated space
+  size_t blockID; // The block id of the examined block.
   bool allocated; // Check block to make sure it is allocated to write to?
-  char *point = heap;
-  header_t header = *point;
-  // TODO
+  header_t* point = (header_t*) heap; // The examined header.
+  int i; // Index
+
+  if(targetBlock <= 0 || numBytes <= 0) {
+    puts("Invalid arguments.");
+    return;
+  }
+
+  // Find the target block
+  while(blockID != targetBlock) {
+    read_block(point, &size, &allocated, &blockID);
+    if(*point == 0) {
+      puts("Unable to find target block");
+      return;
+    } else {
+      point = next_block(point);
+    }
+  }
+
+  for(i = 0; i < numBytes; i++) {
+    printf("%c", *((char*) point + i + 2));
+  }
+  printf("\n");
 }
 
 /*** function next_block ***
