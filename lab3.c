@@ -233,12 +233,10 @@ void allocate_block(char*heap, char** input) {
 		create_block((header_t*)point, allocationSize, true);
 	}
 	else if(header && allocated == false){
-		printf("Second\n");
-		printf("%d\n", ++block_count);
-		*point = allocationSize | 0x8000;
-		printf("%d\n", point);
+		++block_count;
+		*(header_t*)point = allocationSize | 0x8000 + block_count*256;
 		point = point + allocationSize;
-		printf("%d\n", point);
+		*(header_t*)point = size-allocationSize;
 	}
 }
 
@@ -262,16 +260,19 @@ void free_block(char*heap, char** input) {
     puts("Invalid block number.");
     return;
   }
-	read_block(&header, &size, &allocated, &blockID);
+	read_block((header_t*) point, &size, &allocated, &blockID);
 	while(blockID != blockDelete){
 	  point = (char*) next_block((header_t*) point);
-	  if (!header) {puts("Invalid block number."); return;}
-	  read_block(&header, &size, &allocated, &blockID);
+	  if (!(header_t*)point){
+		  puts("Invalid block number."); 
+		  return;
+	}
+	  read_block((header_t*) point, &size, &allocated, &blockID);
   }
-	
+	//printf("%d\t%d\n", blockID,blockDelete);
 	if (blockID == blockDelete){
-		*(header_t*)point = *(header_t*)point & ~0x8000;
-		
+		*(header_t*)point = *(header_t*)point & ~0x8000; 
+		*(header_t*)point -= 256*blockID;
 	} 
 }
 
@@ -292,7 +293,7 @@ void print_blocklist(char*heap, char** input) {
   start = heap;
   printf("Size\tAllocated\tStart\tEnd\t\n");
   // Loop through the blocks
-  while(*((header_t*) start) != 0) {
+  while(*(header_t*)start) {
     // Read in the target block.
     read_block((header_t*) start, &size, &allocated, &blockID);
     // Point to it's end.
