@@ -215,7 +215,6 @@ void allocate_block(char*heap, char** input) {
 	bool allocated = false;
 	char *point = heap;
 	header_t header = *point;
-	int number_given = 0;
 	size_t blockID;
 	if(allocationSize <= 2) {
 		puts("Invalid allocation size. Header is 2 bytes. Minimum Allocation Size is 3 bytes");
@@ -231,10 +230,10 @@ void allocate_block(char*heap, char** input) {
 	++block_count;
 	printf("%d\n", block_count);
 	if (size == allocationSize){
-		*(header_t*)point = (allocationSize) | 0x8000 + block_count*512;
+		*(header_t*)point = (allocationSize | 0x8000) + block_count*512;
 	}
 	else if((size - allocationSize) > 2){
-		*(header_t*)point = (allocationSize) | 0x8000 + block_count*512;
+		*(header_t*)point = (allocationSize | 0x8000) + block_count*512;
 		point = point + allocationSize;
 		if (!*(header_t*)point){
 			*(header_t*)point = size - allocationSize;
@@ -242,7 +241,7 @@ void allocate_block(char*heap, char** input) {
 	}
 	else{
 		printf("Remaining blocks remaining will lead to fragmentation, block size increased to eliminate fragmentation.\n");
-		*(header_t*)point = (size) | 0x8000 + block_count*512;
+		*(header_t*)point = (size | 0x8000) + block_count*512;
 		point = point + size;
 		if (!*(header_t*)point){
 			*(header_t*)point = size;
@@ -261,11 +260,10 @@ Returns: void
 */
 void free_block(char*heap, char** input) {
 	int blockDelete = atoi(input[1]);
-	int blockID;
+	size_t blockID;
 	size_t size;
 	bool allocated;
 	char *point = heap;
-	header_t header = *point;
   size_t totalSize = 0;
   if(blockDelete <= 0) {
     puts("Invalid block number.");
@@ -366,13 +364,13 @@ void write_block(char*heap, char** input) {
       point = next_block(point);
     }
   }
-	printf("%d\n", blockID);
+	printf("%ld\n", blockID);
   if (!allocated){
 		puts("Invalid block number. Block must be reallocated to use.");
 		return;
 	}
   if (size-2 < charNum) printf("ERROR: YOU ARE NOW CORRUPTING THE HEAP!\n");
-  
+
   for(i = 0; i < charNum; i++) {
     *((char*) point + 2 + i) = character;
   }
@@ -421,7 +419,7 @@ void print_heap(char*heap, char** input) {
 	}
 
   if (size-2 < numBytes) printf("ERROR: Reading more than block size.\n");
-  
+
   for(i = 0; i < numBytes; i++) {
     printf("%c", *((char*) point + 2 + i));
   }
