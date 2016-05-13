@@ -266,6 +266,7 @@ void free_block(char*heap, char** input) {
 	bool allocated;
 	char *point = heap;
 	header_t header = *point;
+  size_t totalSize = 0;
   if(blockDelete <= 0) {
     puts("Invalid block number.");
     return;
@@ -274,7 +275,8 @@ void free_block(char*heap, char** input) {
 	while(blockID != blockDelete){
 	  point = (char*) next_block((header_t*) point);
 	  read_block((header_t*) point, &size, &allocated, &blockID);
-	  if (blockID == 0){
+    totalSize += size;
+	  if (blockID == 0 || totalSize >= 400){
 			puts("Invalid block number.");
 			return;
 	  }
