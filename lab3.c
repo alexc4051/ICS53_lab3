@@ -291,14 +291,14 @@ void print_blocklist(char*heap, char** input) {
   printf("Size\tAllocated\tStart\tEnd\t\n");
 
   // Loop through the blocks
-  while(*(header_t*)start) {
+  while(*(header_t*)start) { // && blockID !=0
     // Read in the target block.
     read_block((header_t*) start, &size, &allocated, &blockID);
     // Point to it's end.
     end = start + size - 1;
     // Print it's information to stdout.
 	  //BlockID added to just check for and ease of use
-    printf("%ld\t%s\t%p\t%p\t%ld\n", size, allocated == true ? "yes" : "no", start, end, blockID);
+    printf("%ld\t%s\t\t%p\t%p\n", size, allocated == true ? "yes" : "no", start, end);
     // Advance to the next block.
     start = (char*) next_block((header_t*) start);
   }
