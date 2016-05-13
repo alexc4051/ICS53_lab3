@@ -276,7 +276,7 @@ void free_block(char*heap, char** input) {
 	  read_block((header_t*) point, &size, &allocated, &blockID);
 	  if (blockID == 0){
 			puts("Invalid block number.");
-			return;  
+			return;
 	  }
   }
 	if (blockID == blockDelete){
@@ -367,8 +367,8 @@ void write_block(char*heap, char** input) {
 			puts("Invalid block number.");
 			return;
 		}
-  for(i = 2; i < charNum; i++) {
-    *((char*) point +i) = character;
+  for(i = 0; i < charNum; i++) {
+    *((char*) point + 2 + i) = character;
   }
 
 }
@@ -412,8 +412,8 @@ void print_heap(char*heap, char** input) {
 			return;
 		}
 
-  for(i = 2; i < numBytes; i++) {
-    printf("%c", *((char*) point + i));
+  for(i = 0; i < numBytes; i++) {
+    printf("%c", *((char*) point + 2 + i));
   }
   printf("\n");
 }
