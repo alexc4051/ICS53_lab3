@@ -29,7 +29,6 @@ header_t* next_block(header_t* header);
 int block_count = 0;
 int read_command(struct Command* container);
 void allocate_block(char*heap, char** input);
-void create_block(header_t* header, size_t size, bool allocated);
 void free_block(char*heap, char** input);
 void free_command(struct Command* target);
 void heap_alloc();
@@ -52,6 +51,7 @@ void heap_alloc() {
   struct Command input; // Input read in from the command line.
   // Set all values in the heap to zero
   memset(heap, '\0', 400);
+  *(header_t*)heap = 400;
   // Run the heap_alloc's loop.
   while(1) {
     // Read in input from the console and run the command.
@@ -222,21 +222,17 @@ void allocate_block(char*heap, char** input) {
 		return;
 	}
 	read_block((header_t*) point, &size, &allocated, &blockID);
-	while (header && allocated == true){
+	while (header && (allocated == true || size < allocationSize)){
 		// header = (header_t*)(((char*) header) + size);
 		point = (char*) next_block((header_t*) point);
 		header = *point;
 		read_block((header_t*) point, &size, &allocated, &blockID);
 	}
-	if(!header){
+	if(header && allocated == false){
 		++block_count;
-		create_block((header_t*)point, allocationSize, true);
-	}
-	else if(header && allocated == false){
-		++block_count;
-		*(header_t*)point = allocationSize | 0x8000 + block_count*256;
+		*(header_t*)point = (allocationSize) | 0x8000 + block_count*512;
 		point = point + allocationSize;
-		*(header_t*)point = size-allocationSize;
+		*(header_t*)point = size - allocationSize;
 	}
 }
 
@@ -272,7 +268,7 @@ void free_block(char*heap, char** input) {
 	//printf("%d\t%d\n", blockID,blockDelete);
 	if (blockID == blockDelete){
 		*(header_t*)point = *(header_t*)point & ~0x8000;
-		*(header_t*)point -= 256*blockID;
+		*(header_t*)point -= 512*blockID;
 	}
 }
 
@@ -302,7 +298,7 @@ void print_blocklist(char*heap, char** input) {
     end = start + size - 1;
     // Print it's information to stdout.
 	  //BlockID added to just check for and ease of use
-    printf("%ld\t%s\t%p\t%p\t%ld\n", size - 2, allocated == true ? "yes" : "no", start + 2, end, blockID);
+    printf("%ld\t%s\t%p\t%p\t%ld\n", size, allocated == true ? "yes" : "no", start, end, blockID);
     // Advance to the next block.
     start = (char*) next_block((header_t*) start);
   }
@@ -347,7 +343,7 @@ void write_block(char*heap, char** input) {
   }
 
   for(i = 0; i < charNum; i++) {
-    *((char*) point + i + 2) = character;
+    *((char*) point + i) = character;
   }
 
 }
@@ -388,7 +384,7 @@ void print_heap(char*heap, char** input) {
   }
 
   for(i = 0; i < numBytes; i++) {
-    printf("%c", *((char*) point + i + 2));
+    printf("%c", *((char*) point + i));
   }
   printf("\n");
 }
@@ -428,20 +424,6 @@ Return: void
 */
 void read_block(header_t* header, size_t* size, bool* allocated, size_t* blockID) {
   *allocated = *header & 0x8000 ? true : false; // Check the allocated bit
-  *blockID = (size_t)((*header & ~0x8000)/256);
-  *size = (size_t)((*header & ~0x8000) - (*blockID)*256); // Read in the size of the header.
-}
-
-/*** function create_block ***
-Read data from a header.
-Input:
-# header_t* header : A pointer to the target header.
-# size_t* size : The size read in from "header"
-# bool* allocated : A boolean indicating whether or not the block is allocated.
-Return: void
-*/
-void create_block(header_t* header, size_t size, bool allocated) {
-  *header = allocated == true ? (size + 2) | 0x8000 : size + 2;
-  //Sets BlockID through multiples of 256 (256 in binary = 0x0000 0001 0000 0000)
-  *header += 256*block_count;
+  *blockID = (size_t)((*header & ~0x8000)/512);
+  *size = (size_t)((*header & ~0x8000) - (*blockID)*512); // Read in the size of the header.
 }

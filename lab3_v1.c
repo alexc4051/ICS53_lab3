@@ -232,9 +232,7 @@ void allocate_block(char*heap, char** input) {
 		++block_count;
 		*(header_t*)point = (allocationSize + 2) | 0x8000 + block_count*512;
 		point = point + allocationSize + 2;
-		printf("%x", point);
 		*(header_t*)point = size - allocationSize - 2;
-		printf("%x",point + size - allocationSize - 2);
 	}
 }
 
