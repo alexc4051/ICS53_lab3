@@ -355,9 +355,11 @@ void write_block(char*heap, char** input) {
   }
 
   // Find the target block
-  while(blockID != targetBlock) {
+  while(1) {
     read_block(point, &size, &allocated, &blockID);
-    if(blockID == 0) {
+    if(blockID != targetBlock) {
+      break;
+    } else if(blockID == 0) {
       puts("Unable to find target block");
       return;
     } else {
@@ -400,9 +402,11 @@ void print_heap(char*heap, char** input) {
   }
 
   // Find the target block
-  while(blockID != targetBlock) {
+  while(1) {
     read_block(point, &size, &allocated, &blockID);
-    if(blockID == 0) {
+    if(blockID != targetBlock) {
+      break;
+    } else if(blockID == 0) {
       puts("Unable to find target block");
       return;
     } else {
