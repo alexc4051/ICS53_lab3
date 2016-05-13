@@ -264,16 +264,16 @@ void free_block(char*heap, char** input) {
 	while(blockID != blockDelete){
 	  point = (char*) next_block((header_t*) point);
 	  if (!(header_t*)point){
-		  puts("Invalid block number."); 
+		  puts("Invalid block number.");
 		  return;
 	}
 	  read_block((header_t*) point, &size, &allocated, &blockID);
   }
 	//printf("%d\t%d\n", blockID,blockDelete);
 	if (blockID == blockDelete){
-		*(header_t*)point = *(header_t*)point & ~0x8000; 
+		*(header_t*)point = *(header_t*)point & ~0x8000;
 		*(header_t*)point -= 256*blockID;
-	} 
+	}
 }
 
 /*** function print_blocklist ***
@@ -374,7 +374,7 @@ header_t* next_block(header_t* header) {
   // Read in the size of the header.
   // Note: 0x8000 == 1000 0000 0000 0000 in binary, so this line will get rid
   // of the most significant bit (that stores the allocated bit).
-  size = *header & ~0x8000;
+  size = *header & 0x00FF;
 
   // Return a pointer to the next header.
   return (header_t*)(((char*) header) + size);
