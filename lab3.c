@@ -284,21 +284,26 @@ void print_blocklist(char*heap, char** input) {
   size_t size; // The size of a single block.
   size_t blockID;
   bool allocated; // The allocation status of a single block.
-  char* start; // The starting address of a single block.
+  char* start = heap; // The starting address of a single block.
   char* end; // The ending address of a single block
-  start = heap;
+  size_t totalSize = 0; // The total amount of blocks we have examined.
 
-  printf("Size\tAllocated\tStart\tEnd\t\n");
+  // printf("Size\tAllocated\tStart\tEnd\t\n");
+  printf("%-7s%-12s%-16s%-16s\n", "Size", "Allocated", "Start", "End");
 
   // Loop through the blocks
-  while(*(header_t*)start) {
+  while(*(header_t*)start) { // && blockID !=0
     // Read in the target block.
     read_block((header_t*) start, &size, &allocated, &blockID);
+    // Loop until we are out of the bounds of our heap. (400 blocks).
+    totalSize += size;
+    if(totalSize >= 400) {
+      break;
+    }
     // Point to it's end.
     end = start + size - 1;
     // Print it's information to stdout.
-	  //BlockID added to just check for and ease of use
-    printf("%ld\t%s\t%p\t%p\t%ld\n", size, allocated == true ? "yes" : "no", start, end, blockID);
+    printf("%-7ld%-12s%-16p%-16p\n", size, allocated == true ? "yes" : "no", start, end);
     // Advance to the next block.
     start = (char*) next_block((header_t*) start);
   }
