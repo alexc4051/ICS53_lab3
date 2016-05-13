@@ -302,7 +302,7 @@ void print_blocklist(char*heap, char** input) {
     end = start + size - 1;
     // Print it's information to stdout.
 	  //BlockID added to just check for and ease of use
-    printf("%ld\t%s\t%p\t%p\t%ld\n", size, allocated == true ? "yes" : "no", start, end, blockID);
+    printf("%ld\t%s\t%p\t%p\t%ld\n", size - 2, allocated == true ? "yes" : "no", start + 2, end, blockID);
     // Advance to the next block.
     start = (char*) next_block((header_t*) start);
   }
@@ -428,8 +428,8 @@ Return: void
 */
 void read_block(header_t* header, size_t* size, bool* allocated, size_t* blockID) {
   *allocated = *header & 0x8000 ? true : false; // Check the allocated bit
-  *blockID = (size_t*)((*header & ~0x8000)/256);
-  *size = (size_t*)(*header & ~0x8000 - (*blockID)*256); // Read in the size of the header.
+  *blockID = (size_t)((*header & ~0x8000)/256);
+  *size = (size_t)((*header & ~0x8000) - (*blockID)*256); // Read in the size of the header.
 }
 
 /*** function create_block ***
@@ -441,8 +441,7 @@ Input:
 Return: void
 */
 void create_block(header_t* header, size_t size, bool allocated) {
-  *header = allocated == true ? size | 0x8000 : size;
-  int i = 0;
+  *header = allocated == true ? (size + 2) | 0x8000 : size + 2;
   //Sets BlockID through multiples of 256 (256 in binary = 0x0000 0001 0000 0000)
   *header += 256*block_count;
 }
