@@ -347,7 +347,7 @@ void write_block(char*heap, char** input) {
   int i; // Index
 
   // Validate input
-  if(targetBlock <= 0 || charNum <= 0) {
+  if(targetBlock <= 0 || charNum <= 0 || strlen(input[2]) != 1) {
     puts("Invalid arguments.");
     return;
   }
