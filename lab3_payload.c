@@ -216,14 +216,13 @@ void allocate_block(char*heap, char** input) {
 	char *point = heap;
 	header_t header = *point;
 	size_t blockID;
-	if(allocationSize <= 2) {
-		puts("Invalid allocation size. Header is 2 bytes. Minimum Allocation Size is 3 bytes");
+	if(allocationSize <= 0) {
+		puts("Invalid allocation size.");
 		return;
 	}
   allocationSize += 2;
 	read_block((header_t*) point, &size, &allocated, &blockID);
 	while (header && (allocated == true || size < allocationSize)){
-		// header = (header_t*)(((char*) header) + size);
 		point = (char*) next_block((header_t*) point);
 		header = *point;
 		read_block((header_t*) point, &size, &allocated, &blockID);
@@ -365,7 +364,7 @@ void write_block(char*heap, char** input) {
       point = next_block(point);
     }
   }
-	printf("%ld\n", blockID);
+
   if (!allocated){
 		puts("Invalid block number. Block must be reallocated to use.");
 		return;
